@@ -17,6 +17,6 @@ export const signup = (data) => api.post('/user/signup', data)
 export const login = (data) => api.post('/user/login', data)
 export const fetchCandidates = () => api.get('/candidate')
 export const voteCandidate = (id) => api.post(`/candidate/vote/${id}`)
-export const fetchElection = () => api.get('/election')
+//export const fetchElection = () => api.get('/election')
 
 export default api
