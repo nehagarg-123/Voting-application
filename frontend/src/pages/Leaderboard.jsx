@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 export default function Leaderboard() {
   const [candidates, setCandidates] = useState([]);
-  const API_BASE = 'http://localhost:5000'; // Change to your backend base URL
+  const API_BASE = import.meta.env.VITE_API_BASE_URL;  // ✅ use env var
 
   // Sort candidates by vote count
   const sortCandidates = (list) => {
