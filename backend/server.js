@@ -10,13 +10,13 @@ const db = require('./db'); // MongoDB connection
 const Candidate = require('./models/candidate'); // Only needed for results
 
 // Middleware
-app.use(cors({ origin: "https://voting-application-frontend.onrender.com", methods: ["GET", "POST"] }));
+app.use(cors({ origin: "http://localhost:5173","https://voting-application-frontend.onrender.com", methods: ["GET", "POST"] }));
 app.use(bodyParser.json());
 
 // HTTP + Socket.io setup
 const server = http.createServer(app);
 const io = new Server(server, {
-    cors: { origin: "https://voting-application-frontend.onrender.com", methods: ["GET", "POST"] }
+    cors: { origin: "http://localhost:5173","https://voting-application-frontend.onrender.com", methods: ["GET", "POST"] }
 });
 app.set('socketio', io);
 
