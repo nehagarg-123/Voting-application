@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 export default function Leaderboard() {
   const [candidates, setCandidates] = useState([]);
-  const API_BASE = import.meta.env.VITE_API_BASE_URL;  // ✅ use env var
+  const API_BASE = import.meta.env.VITE_API_BASE_URL;  // 
 
   // Sort candidates by vote count
   const sortCandidates = (list) => {
