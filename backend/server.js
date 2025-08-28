@@ -11,12 +11,13 @@ const Candidate = require('./models/candidate'); // Only needed for results
 
 // Middleware
 //app.use(cors({ origin: "https://voting-application-frontend.onrender.com", methods: ["GET", "POST"] }));
+app.use(bodyParser.json());
 app.use(cors({
   origin: ["https://voting-application-frontend.onrender.com"], // add your frontend URL
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 }));
-app.use(bodyParser.json());
+
 
 // HTTP + Socket.io setup
 const server = http.createServer(app);
