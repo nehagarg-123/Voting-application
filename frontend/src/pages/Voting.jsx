@@ -1,53 +1,26 @@
-import React, { useEffect, useState, useRef } from 'react'
-import { fetchCandidates, voteCandidate, fetchElection } from '../services/api'
+import React, { useEffect, useState } from 'react'
+import { fetchCandidates, voteCandidate } from '../services/api'
 import { socket } from '../services/socket'
-
-function formatTimeLeft(ms) {
-  if (ms <= 0) return '0s'
-  const totalSeconds = Math.floor(ms / 1000)
-  const d = Math.floor(totalSeconds / (3600 * 24))
-  const h = Math.floor((totalSeconds % (3600 * 24)) / 3600)
-  const m = Math.floor((totalSeconds % 3600) / 60)
-  const s = totalSeconds % 60
-  let parts = []
-  if (d) parts.push(`${d}d`)
-  if (h) parts.push(`${h}h`)
-  if (m) parts.push(`${m}m`)
-  parts.push(`${s}s`)
-  return parts.join(' ')
-}
 
 export default function Voting() {
   const [candidates, setCandidates] = useState([])
-  const [election, setElection] = useState(null)
-  const [timeLeftText, setTimeLeftText] = useState('')
-  const intervalRef = useRef(null)
   const [loadingVoteId, setLoadingVoteId] = useState(null)
-  const [votedCandidateId, setVotedCandidateId] = useState(null) // NEW
+  const [votedCandidateId, setVotedCandidateId] = useState(null)
 
   const loadCandidates = async () => {
     try {
       const res = await fetchCandidates()
       setCandidates(res.data.candidates || res.data || [])
-      setVotedCandidateId(res.data.votedCandidateId || null) // fetch which candidate you voted
+      setVotedCandidateId(res.data.votedCandidateId || null)
     } catch (err) {
-      console.error('Load candidates', err)
-    }
-  }
-
-  const loadElection = async () => {
-    try {
-      const r = await fetchElection()
-      setElection(r.data)
-    } catch (err) {
-      console.warn('No election info', err)
+      console.error('Load candidates error:', err)
     }
   }
 
   useEffect(() => {
     loadCandidates()
-    loadElection()
 
+    // Socket updates for votes
     socket.on('voteUpdated', (updatedCandidates) => {
       if (Array.isArray(updatedCandidates)) {
         setCandidates(updatedCandidates)
@@ -62,51 +35,20 @@ export default function Voting() {
       }
     })
 
-    socket.on('electionStatusUpdated', payload => {
-      setElection(prev => ({ ...(prev || {}), status: payload.status }))
-    })
-
     return () => {
       socket.off('voteUpdated')
-      socket.off('electionStatusUpdated')
     }
   }, [])
-
-  useEffect(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
-    }
-
-    const updateTime = () => {
-      if (!election) { setTimeLeftText(''); return }
-      const now = new Date()
-      const start = election.startDate ? new Date(election.startDate) : null
-      const end = election.endDate ? new Date(election.endDate) : null
-
-      if (election.status === 'upcoming' && start) {
-        setTimeLeftText(`Voting starts in: ${formatTimeLeft(start - now)}`)
-      } else if (election.status === 'live' && end) {
-        setTimeLeftText(`Voting ends in: ${formatTimeLeft(end - now)}`)
-      } else {
-        setTimeLeftText('')
-      }
-    }
-
-    updateTime()
-    intervalRef.current = setInterval(updateTime, 1000)
-    return () => clearInterval(intervalRef.current)
-  }, [election])
 
   const onVote = async (id) => {
     try {
       setLoadingVoteId(id)
       await voteCandidate(id)
-      setVotedCandidateId(id) // store the candidate you voted for
+      setVotedCandidateId(id)
       setLoadingVoteId(null)
     } catch (err) {
       setLoadingVoteId(null)
-      console.error('Vote failed', err)
+      console.error('Vote failed:', err)
       loadCandidates()
       alert(err?.response?.data?.message || 'Vote failed')
     }
