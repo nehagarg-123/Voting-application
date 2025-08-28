@@ -22,6 +22,8 @@ ChartJS.register(
   ArcElement
 );
 
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+
 export default function Results() {
   const [chartData, setChartData] = useState(null);
   const [error, setError] = useState(null);
@@ -40,7 +42,7 @@ export default function Results() {
 
   useEffect(() => {
     // 🎯 Fetch initial results
-    fetch("http://localhost:5000/vote/results")
+    fetch(`${BACKEND_URL}/vote/results`)
       .then(res => res.json())
       .then(data => {
         const labels = Object.keys(data);
@@ -81,7 +83,7 @@ export default function Results() {
     // 🎯 Socket.IO live updates
     let socket;
     try {
-      socket = io("http://localhost:5000", { transports: ["websocket"] });
+      socket = io(BACKEND_URL, { transports: ["websocket"] });
 
       socket.on("connect_error", (err) => {
         console.error("Socket connection error:", err);
@@ -94,7 +96,7 @@ export default function Results() {
         const labels = Object.keys(results);
         const votes = Object.values(results).map(v => Number(v));
 
-        setChartData((prev) => ({
+        setChartData({
           labels,
           datasets: [
             {
@@ -119,7 +121,7 @@ export default function Results() {
               borderWidth: 1,
             },
           ],
-        }));
+        });
       });
     } catch (err) {
       console.error("Error initializing socket:", err);
