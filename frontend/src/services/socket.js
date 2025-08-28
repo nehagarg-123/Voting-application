@@ -1,6 +1,4 @@
-import { io } from "socket.io-client";
-
-// Connect to backend
-export const socket = io("http://localhost:5000", {
-  transports: ["websocket"] // Ensures stable connection
-});
+// services/socket.js
+import { io } from 'socket.io-client';
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
+export const socket = io(API_BASE, { transports: ['websocket'] });
