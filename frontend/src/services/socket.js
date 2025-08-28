@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
 // Connect to backend
-export const socket = io("http://localhost:5000", {
+export const socket = io("https://voting-application-5wm0.onrender.com", {
   transports: ["websocket"] // Ensures stable connection
 });
