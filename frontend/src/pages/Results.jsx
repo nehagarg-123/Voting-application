@@ -134,7 +134,7 @@ export default function Results() {
   }, []);
 
   return (
-    <div className="p-12 min-h-screen bg-gradient-to-r from-purple-700 via-pink-500 to-red-500 text-white">
+    <div className="p-12 relative w-screen min-h-screen bg-gradient-to-r from-purple-700 via-pink-500 to-red-500 text-white">
       <h1 className="text-3xl font-bold text-center mb-12">
         Live Election Results
       </h1>
