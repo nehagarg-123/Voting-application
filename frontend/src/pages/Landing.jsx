@@ -7,7 +7,7 @@ export default function LandingPage() {
     <div className="bg-gray-50 text-gray-800">
       {/* Hero Section */}
       <section
-       className="min-h-screen w-full flex flex-col justify-center items-center text-white text-center px-6 relative bg-cover bg-center bg-no-repeat"
+       className="relative w-screen min-h-screen w-full flex flex-col justify-center items-center text-white text-center px-6 relative bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: `url(${Landingimage})`, // ✅ Fix template string
         }}
@@ -32,19 +32,19 @@ export default function LandingPage() {
       </section>
 
       {/* About Section */}
-      <section className="py-20 px-10 text-center bg-gradient-to-r from-blue-100 to-yellow-800">
+      <section className="relative w-screen py-20 px-10 text-center bg-gradient-to-r from-yellow-500 to-yellow-900">
         <h2 className="text-4xl font-bold mb-6 text-purple-700">
           Why Choose Our Voting App?
         </h2>
         <p className="max-w-3xl mx-auto text-lg text-gray-700">
           Our app ensures <span className="font-semibold text-purple-700">fair, secure, and real-time voting</span>. 
           It’s perfect for elections, polls, competitions, and any event where 
-          <span className="font-semibold"> transparency </span> is the key.
+          <span className=" text-purple-700"> transparency </span> is the key.
         </p>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gradient-to-r from-indigo-200 to-red-800 px-10">
+      <section className=" relative w-screen   py-20 bg-gradient-to-r from-red-400 to-red-800 px-10">
         <h2 className="text-4xl font-bold text-center mb-10 text-indigo-800">
           🚀 Features
         </h2>
@@ -77,7 +77,7 @@ export default function LandingPage() {
       </section>
 
       {/* How it Works Section */}
-      <section className="py-20 px-10 text-center bg-gradient-to-r from-purple-900 to-red-100">
+      <section className=" relative w-screen   py-20 px-10 text-center bg-gradient-to-r from-purple-900 to-red-100">
         <h2 className="text-4xl font-bold mb-10 text-black-900">How It Works</h2>
         <ol className="space-y-6 text-lg text-gray-700 max-w-2xl mx-auto">
           <li>1️⃣ <span className="font-semibold text-red-900">Register</span> an account securely.</li>
@@ -87,8 +87,8 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-6 text-center">
-        <p>© 2025 Voting App | Built with MERN</p>
+      <footer className=" relative w-screen  bg-gray-900 text-white py-6 text-center">
+        <p></p>
       </footer>
     </div>
   );
