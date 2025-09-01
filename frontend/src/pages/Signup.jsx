@@ -34,7 +34,7 @@ export default function Signup() {
       ></div>
 
       {/* Dark overlay */}
-      <div className="absolute inset-0 bg-violet-300"></div>
+      <div className="absolute inset-0 bg-violet-400"></div>
 
       {/* Signup card */}
       <div className="relative flex items-center justify-center min-h-screen p-4">
