@@ -10,12 +10,8 @@ const candidateSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    age: {
-        type: Number,
-        required: true
-    },
-   
-    photo: {
+    
+    image: {
         type: String // This will store a URL to the candidate's image
     },
     
