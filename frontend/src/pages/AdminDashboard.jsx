@@ -18,7 +18,7 @@ export default function AdminDashboard() {
 
   // delete candidate
   const handleDelete = async (id) => {
-    await fetch(`http://localhost:5000/candidate/${id}`, {
+    await fetch(`https://voting-application-5wm0.onrender.com/candidate/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
