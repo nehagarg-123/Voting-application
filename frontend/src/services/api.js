@@ -19,4 +19,12 @@ export const fetchCandidates = () => api.get('/candidate')
 export const voteCandidate = (id) => api.post(`/candidate/vote/${id}`)
 //export const fetchElection = () => api.get('/election')
 
+export const adminLogin = (data) => api.post('/admin/login', data)
+export const editCandidate = (id, data) => {
+  const token = localStorage.getItem('adminToken') // use adminToken
+  return api.put(`/candidate/edit/${id}`, data, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+}
+
 export default api
