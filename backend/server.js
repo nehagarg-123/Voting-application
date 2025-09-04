@@ -51,10 +51,13 @@ setInterval(emitResults, 5000);
 const userRoutes = require('./routes/userRoutes');
 const candidateRoutes = require('./routes/candidateRoutes');
 const voteRoutes = require('./routes/voteRoutes');
+const adminRoutes = require("./routes/adminRoutes");
+
 
 app.use('/user', userRoutes);
 app.use('/candidate', candidateRoutes);
 app.use('/vote', voteRoutes);
+app.use("/admin", adminRoutes);
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
