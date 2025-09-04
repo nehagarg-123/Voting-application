@@ -6,23 +6,24 @@ const http = require('http');
 const { Server } = require("socket.io");
 const bodyParser = require('body-parser');
 
+//const frontendURL = process.env.FRONTEND_URL || "http://localhost:5173";
+
 const db = require('./db'); // MongoDB connection
 const Candidate = require('./models/candidate'); // Only needed for results
 
 // Middleware
-//app.use(cors({ origin: "https://voting-application-frontend.onrender.com", methods: ["GET", "POST"] }));
-app.use(bodyParser.json());
 app.use(cors({
-  origin: ["https://voting-application-frontend.onrender.com"], // add your frontend URL
+  origin: "http://localhost:5173",
   methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true,
+  credentials: true
 }));
 
+app.use(express.json());
 
 // HTTP + Socket.io setup
 const server = http.createServer(app);
 const io = new Server(server, {
-    cors: { origin: "https://voting-application-frontend.onrender.com", methods: ["GET", "POST"] }
+    cors: { origin: "http://localhost:5173", methods: ["GET", "POST"] }
 });
 app.set('socketio', io);
 
@@ -52,7 +53,6 @@ const userRoutes = require('./routes/userRoutes');
 const candidateRoutes = require('./routes/candidateRoutes');
 const voteRoutes = require('./routes/voteRoutes');
 const adminRoutes = require("./routes/adminRoutes");
-
 
 app.use('/user', userRoutes);
 app.use('/candidate', candidateRoutes);
