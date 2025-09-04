@@ -10,7 +10,7 @@ export default function AddCandidate() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await fetch("http://localhost:5000/candidate", {
+    await fetch("https://voting-application-5wm0.onrender.com/candidate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
