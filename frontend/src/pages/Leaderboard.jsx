@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 
 export default function Leaderboard() {
   const [candidates, setCandidates] = useState([]);
-  const API_BASE = 'http://localhost:5000'; 
+
+  // 👇 Access Environment Variable
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   // Sort candidates by vote count (Highest to Lowest)
   const sortCandidates = (list) => {
@@ -11,7 +13,8 @@ export default function Leaderboard() {
 
   const fetchLeaderboard = async () => {
     try {
-      const res = await fetch(`${API_BASE}/candidate/vote/count`);
+      // 👇 Updated URL
+      const res = await fetch(`${API_BASE_URL}/candidate/vote/count`);
       if (!res.ok) throw new Error('Failed to fetch leaderboard');
       const data = await res.json();
       setCandidates(sortCandidates(data));
@@ -31,7 +34,7 @@ export default function Leaderboard() {
     <div className="w-full max-w-4xl mx-auto p-8 mt-24 bg-gradient-to-br from-red-600 via-red-500 to-orange-400 rounded-3xl shadow-2xl border-4 border-red-700">
       
       <h2 className="text-3xl font-extrabold text-center mb-8 text-white drop-shadow-md">
-          Live Leaderboard
+         Live Leaderboard
       </h2>
 
       {/* List Container */}
