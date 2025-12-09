@@ -9,24 +9,32 @@ export default function Login() {
   const navigate = useNavigate();
 
   const submit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await login(form);
-      const token =
-        res.data.token || (typeof res.data === "string" ? res.data : null);
-      if (token) {
-        localStorage.setItem("token", token);
-        navigate("/vote");
+  e.preventDefault();
+  try {
+    const res = await login(form);
+    const token = res.data.token;
+    const role = res.data.role; // backend should send this
+
+    if (token) {
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
+
+      if (role === "admin") {
+        navigate("/admin/dashboard"); // admin page
       } else {
-        setErr("Token not returned from server");
+        navigate("/vote"); // normal user
       }
-    } catch (error) {
-      setErr(
-        error?.response?.data?.error ||
-          "Login failed. Please check your credentials."
-      );
+    } else {
+      setErr("Token not returned from server");
     }
-  };
+  } catch (error) {
+    setErr(
+      error?.response?.data?.error ||
+        "Login failed. Please check your credentials."
+    );
+  }
+};
+
 
   return (
     <div className="relative w-screen h-screen">
