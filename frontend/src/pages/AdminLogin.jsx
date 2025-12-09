@@ -7,11 +7,15 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  // 👇 Access Environment Variable
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   // ✅ handleLogin inside the component
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("https://voting-application-5wm0.onrender.com/admin/login", {
+      // 👇 Updated to use the variable
+      const res = await fetch(`${API_BASE_URL}/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
