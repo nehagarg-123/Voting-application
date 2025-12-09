@@ -2,18 +2,18 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 export default function EditCandidate() {
-  const { id } = useParams(); // get candidate ID from URL
+  const { id } = useParams();
   const navigate = useNavigate();
   const token = localStorage.getItem("adminToken");
 
-  // State for candidate fields
   const [name, setName] = useState("");
   const [party, setParty] = useState("");
   const [image, setImage] = useState("");
 
-  // Fetch candidate data when component mounts
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   useEffect(() => {
-    fetch(`https://voting-application-5wm0.onrender.com/candidate/${id}`, {
+    fetch(`${API_BASE_URL}/candidate/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
@@ -23,14 +23,12 @@ export default function EditCandidate() {
         setImage(data.image || "");
       })
       .catch((err) => console.error(err));
-  }, [id, token]);
+  }, [id, token, API_BASE_URL]);
 
-  // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Send updated data to backend
-    await fetch(`https://voting-application-5wm0.onrender.com/candidate/${id}`, {
+    await fetch(`${API_BASE_URL}/candidate/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -43,7 +41,7 @@ export default function EditCandidate() {
   };
 
   return (
-    <div className="min-h-screen relative w-screen  flex items-center justify-center bg-gradient-to-r from-red-400 via-pink-400 to-green-300 p-4">
+    <div className="min-h-screen relative w-screen flex items-center justify-center bg-gradient-to-r from-red-400 via-pink-400 to-green-300 p-4">
       <form
         onSubmit={handleSubmit}
         className="bg-violet-200 rounded-xl shadow-lg p-10 w-full max-w-md"
