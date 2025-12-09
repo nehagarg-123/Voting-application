@@ -8,21 +8,36 @@ export default function AddCandidate() {
   const navigate = useNavigate();
   const token = localStorage.getItem("adminToken");
 
+  
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await fetch("https://voting-application-5wm0.onrender.com/candidate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ name, party, image }), // send URL
-    });
-    navigate("/admin-dashboard");
+    try {
+   
+      const response = await fetch(`${API_BASE_URL}/candidate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name, party, image }),
+      });
+
+      if (response.ok) {
+        navigate("/admin-dashboard");
+      } else {
+        console.error("Failed to add candidate");
+        alert("Failed to add candidate. Please check your token or connection.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Something went wrong!");
+    }
   };
 
   return (
-    <div className="min-h-screen relative w-screen  flex items-center justify-center bg-gradient-to-r from-purple-700 via-blue-400 to-yellow-800 p-4">
+    <div className="min-h-screen relative w-screen flex items-center justify-center bg-gradient-to-r from-purple-700 via-blue-400 to-yellow-800 p-4">
       <form className="bg-pink-100 rounded-xl shadow-lg p-10 w-full max-w-md" onSubmit={handleSubmit}>
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Add Candidate</h2>
 
