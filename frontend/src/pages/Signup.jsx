@@ -15,6 +15,9 @@ export default function Signup() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // 👇 Access Environment Variable
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -25,7 +28,8 @@ export default function Signup() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/user/signup/send-otp", {
+      // 👇 Updated URL
+      const response = await fetch(`${API_BASE_URL}/user/signup/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: formData.email }),
@@ -51,7 +55,8 @@ export default function Signup() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/user/signup/verify", {
+      // 👇 Updated URL
+      const response = await fetch(`${API_BASE_URL}/user/signup/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData), // Sends OTP + Name + Pass + ID
