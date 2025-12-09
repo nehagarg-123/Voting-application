@@ -7,14 +7,12 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  // 👇 Access Environment Variable
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-  // ✅ handleLogin inside the component
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      // 👇 Updated to use the variable
+     
       const res = await fetch(`${API_BASE_URL}/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
