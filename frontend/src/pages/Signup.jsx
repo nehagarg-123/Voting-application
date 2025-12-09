@@ -1,93 +1,170 @@
 import React, { useState } from "react";
-import { signup } from "../services/api";
 import { useNavigate } from "react-router-dom";
-import signupImage from "../assets/signupimage.png";
+// 👇 IMPORT THE IMAGE HERE (Make sure the path and filename are exactly right)
+import signupImage from "../assets/signupimage.png"; 
 
 export default function Signup() {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [err, setErr] = useState("");
+  const [step, setStep] = useState(1); // 1 = Send OTP, 2 = Fill Details
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    studentId: "",
+    otp: "", // Holds the entered OTP
+  });
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const submit = async (e) => {
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // --- STAGE 1: SEND OTP ---
+  const handleSendOtp = async (e) => {
     e.preventDefault();
-    setErr(""); // clear any previous error
+    setError("");
 
     try {
-      await signup(form);
-      navigate("/login"); // redirect after success
-    } catch (error) {
-      // show error from backend or default text
-      if (error?.response?.data?.error) {
-        setErr(error.response.data.error);
+      const response = await fetch("http://localhost:5000/user/signup/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("OTP sent to your email!");
+        setStep(2); // Move to next step
       } else {
-        setErr("Signup failed. Please try again.");
+        setError(data.error || "Failed to send OTP");
       }
+    } catch (err) {
+      console.error(err);
+      setError("Server error. Please try again.");
+    }
+  };
+
+  // --- STAGE 2: VERIFY & REGISTER ---
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:5000/user/signup/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData), // Sends OTP + Name + Pass + ID
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Signup Successful! Please Login.");
+        navigate("/login");
+      } else {
+        setError(data.error || "Signup Failed");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Server error.");
     }
   };
 
   return (
-    <div className="relative w-screen h-screen">
-      {/* Background image */}
+    // 1️⃣ Outer Container changed to relative to hold background layers
+    <div className="relative w-screen h-screen overflow-hidden">
+      
+      {/* 2️⃣ Background Image Layer */}
       <div
-        className="absolute inset-0 bg-cover bg-center"
+        className="absolute inset-0 bg-cover bg-center z-0"
         style={{ backgroundImage: `url(${signupImage})` }}
       ></div>
 
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-violet-400"></div>
+      {/* 3️⃣ Overlay Layer (Makes text easier to read) */}
+      <div className="absolute inset-0 bg-purple-900/40 z-0"></div>
 
-      {/* Signup card */}
-      <div className="relative flex items-center justify-center min-h-screen p-4">
-        <div className="w-full max-w-md bg-white/30 backdrop-blur-md border border-white/30 p-8 rounded-xl shadow-lg z-10">
-          <h2 className="text-3xl font-bold mb-6 text-center">Sign Up</h2>
+      {/* 4️⃣ Content Container (Centers the form and puts it on top) */}
+      <div className="relative min-h-screen flex items-center justify-center z-10 p-4">
+        <div className="bg-white/20 backdrop-blur-lg p-8 rounded-2xl shadow-2xl w-96 border border-white/30">
+          <h2 className="text-3xl font-bold text-center mb-6 text-white drop-shadow-lg">
+            {step === 1 ? "Verify Email" : "Finish Signup"}
+          </h2>
 
-          {err && (
-            <div className="bg-red-500/80 text-white py-2 px-4 rounded mb-4 text-center">
-              {err}
-            </div>
+          {error && <div className="bg-red-500/80 text-white text-sm p-2 rounded mb-4 text-center backdrop-blur-sm">{error}</div>}
+
+          {step === 1 ? (
+            // --- FORM STEP 1 ---
+            <form onSubmit={handleSendOtp} className="flex flex-col gap-4">
+              <input
+                type="email"
+                name="email"
+                placeholder="College Email"
+                onChange={handleChange}
+                className="p-3 rounded-lg bg-white/90 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-inner text-gray-800 placeholder-gray-500"
+                required
+              />
+              <button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold transition duration-300 shadow-lg"
+              >
+                Send OTP
+              </button>
+            </form>
+          ) : (
+            // --- FORM STEP 2 ---
+            <form onSubmit={handleSignup} className="flex flex-col gap-4">
+              <div className="bg-white/50 p-2 rounded text-center text-sm font-semibold text-gray-900">
+                OTP sent to: {formData.email}
+              </div>
+              
+              <input
+                type="text"
+                name="otp"
+                placeholder="Enter 6-digit OTP"
+                onChange={handleChange}
+                className="p-3 rounded-lg bg-white/90 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-inner text-gray-800 placeholder-gray-500"
+                required
+              />
+
+              <input
+                type="text"
+                name="name"
+                placeholder="Full Name"
+                onChange={handleChange}
+                className="p-3 rounded-lg bg-white/90 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-inner text-gray-800 placeholder-gray-500"
+                required
+              />
+
+              <input
+                type="text"
+                name="studentId"
+                placeholder="Student ID / Roll No"
+                onChange={handleChange}
+                className="p-3 rounded-lg bg-white/90 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-inner text-gray-800 placeholder-gray-500"
+                required
+              />
+
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                onChange={handleChange}
+                className="p-3 rounded-lg bg-white/90 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-inner text-gray-800 placeholder-gray-500"
+                required
+              />
+
+              <button
+                type="submit"
+                className="bg-purple-700 hover:bg-purple-800 text-white py-3 rounded-lg font-bold transition duration-300 shadow-lg"
+              >
+                Register
+              </button>
+            </form>
           )}
 
-          <form onSubmit={submit} className="flex flex-col gap-4">
-            <input
-              required
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="Name"
-              className="p-3 rounded-md text-black placeholder-gray-700 bg-white/80 border border-white/30 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-            <input
-              required
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              placeholder="Email"
-              type="email"
-              className="p-3 rounded-md text-black placeholder-gray-700 bg-white/80 border border-white/30 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-            <input
-              required
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              type="password"
-              placeholder="Password"
-              className="p-3 rounded-md text-black placeholder-gray-700 bg-white/80 border border-white/30 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-            <button
-              type="submit"
-              className="mt-2 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-md font-semibold transition-colors"
-            >
-              Sign Up
-            </button>
-          </form>
-
-          {/* Link to login page */}
-          <p className="mt-4 text-center text-white">
-            Already have an account?{" "}
-            <span
-              className="text-black hover:underline cursor-pointer"
-              onClick={() => navigate("/login")}
-            >
-              Log In
-            </span>
+          <p className="text-white text-center mt-4 drop-shadow">
+            Already have an account? <a href="/login" className="underline font-bold hover:text-purple-200 transition">Log In</a>
           </p>
         </div>
       </div>
