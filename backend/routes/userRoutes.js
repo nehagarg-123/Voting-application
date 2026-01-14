@@ -18,9 +18,9 @@ router.post('/signup/send-otp', async (req, res) => {
         const { email } = req.body;
 
         // 1. Check Domain restriction
-        if (!email.endsWith(COLLEGE_DOMAIN)) {
-            return res.status(400).json({ error: `Only emails from ${COLLEGE_DOMAIN} are allowed.` });
-        }
+       // if (!email.endsWith(COLLEGE_DOMAIN)) {
+         //   return res.status(400).json({ error: `Only emails from ${COLLEGE_DOMAIN} are allowed.` });
+      //  }
 
         // 2. Check if Email already exists
         const existingUser = await User.findOne({ email: email });
