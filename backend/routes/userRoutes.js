@@ -10,12 +10,16 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
   host: "smtp-relay.brevo.com",
   port: 587,
-  secure: false,
+  secure: false, // MUST be false for 587
   auth: {
-    user: process.env.BREVO_SMTP_USER, 
-    pass: process.env.BREVO_SMTP_PASS  // SMTP KEY
-  }
+    user: process.env.BREVO_SMTP_USER,
+    pass: process.env.BREVO_SMTP_PASS
+  },
+  connectionTimeout: 10000, 
+  greetingTimeout: 10000,
+  socketTimeout: 10000     
 });
+
 
 const COLLEGE_DOMAIN = "@nitjsr.ac.in";
 
