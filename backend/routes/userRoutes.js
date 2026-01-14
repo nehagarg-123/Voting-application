@@ -1,12 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
+const nodemailer = require("nodemailer");
 
 const User = require('./../models/user');
 const Otp = require('./../models/otp');
 const { jwtAuthMiddleware, generateToken } = require('./../jwt');
 
 const COLLEGE_DOMAIN = "@nitjsr.ac.in";
+
+/* ================= SMTP CONFIG (BREVO) ================= */
+const transporter = nodemailer.createTransport({
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.BREVO_SMTP_USER,
+    pass: process.env.BREVO_SMTP_PASS
+  }
+});
 
 /* ================= SEND OTP ================= */
 router.post('/signup/send-otp', async (req, res) => {
@@ -19,14 +30,14 @@ router.post('/signup/send-otp', async (req, res) => {
 
     if (!email.endsWith(COLLEGE_DOMAIN)) {
       return res.status(400).json({
-        error: `Only emails from ${COLLEGE_DOMAIN} are allowed.`
+        error: `Only emails from ${COLLEGE_DOMAIN} are allowed`
       });
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
-        error: 'User with this email already exists'
+        error: "User with this email already exists"
       });
     }
 
@@ -38,39 +49,26 @@ router.post('/signup/send-otp', async (req, res) => {
       { upsert: true }
     );
 
-    /* ✅ BREVO HTTP API (THIS WILL WORK) */
-    await axios.post(
-      "https://api.brevo.com/v3/smtp/email",
-      {
-        sender: {
-          name: "Voting App",
-          email: "noreply@brevo.com"
-        },
-        to: [{ email }],
-        subject: "OTP Verification",
-        htmlContent: `
-          <p>Your OTP for the Voting App is:</p>
-          <h2>${otpCode}</h2>
-          <p>This OTP is valid for 5 minutes.</p>
-        `
-      },
-      {
-        headers: {
-          "api-key": process.env.BREVO_API_KEY,
-          "Content-Type": "application/json"
-        }
-      }
-    );
+    await transporter.sendMail({
+      from: '"Voting App" <nehagarg6201@gmail.com>',
+      to: email,
+      subject: "OTP Verification",
+      html: `
+        <p>Your OTP for the Voting App is:</p>
+        <h2>${otpCode}</h2>
+        <p>This OTP is valid for 5 minutes.</p>
+      `
+    });
 
     res.status(200).json({ message: "OTP sent successfully" });
 
   } catch (err) {
-    console.error("SEND OTP ERROR:", err.response?.data || err.message);
+    console.error("SEND OTP ERROR:", err);
     res.status(500).json({ error: "Failed to send OTP email" });
   }
 });
 
-
+/* ================= VERIFY OTP & SIGNUP ================= */
 router.post('/signup/verify', async (req, res) => {
   try {
     const data = req.body;
@@ -78,14 +76,14 @@ router.post('/signup/verify', async (req, res) => {
     const adminUser = await User.findOne({ role: 'admin' });
     if (data.role === 'admin' && adminUser) {
       return res.status(400).json({
-        error: 'Admin user already exists'
+        error: "Admin user already exists"
       });
     }
 
     const otpRecord = await Otp.findOne({ email: data.email });
     if (!otpRecord || otpRecord.otp !== data.otp) {
       return res.status(400).json({
-        error: 'Invalid or expired OTP'
+        error: "Invalid or expired OTP"
       });
     }
 
@@ -105,14 +103,14 @@ router.post('/signup/verify', async (req, res) => {
     console.error(err);
     if (err.code === 11000) {
       return res.status(400).json({
-        error: 'Student ID or Email already registered.'
+        error: "Student ID or Email already registered"
       });
     }
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-
+/* ================= LOGIN ================= */
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -120,7 +118,7 @@ router.post('/login', async (req, res) => {
     const user = await User.findOne({ email });
     if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({
-        error: 'Invalid email or password'
+        error: "Invalid email or password"
       });
     }
 
@@ -128,39 +126,48 @@ router.post('/login', async (req, res) => {
     res.json({ token });
 
   } catch (err) {
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-
+/* ================= PROFILE ================= */
 router.get('/profile', jwtAuthMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     res.status(200).json({ user });
   } catch (err) {
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
+/* ================= CHANGE PASSWORD ================= */
 router.put('/profile/password', jwtAuthMiddleware, async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const { currentPassword, newPassword } = req.body;
-        if (!currentPassword || !newPassword) {
-            return res.status(400).json({ error: 'Both currentPassword and newPassword are required' });
-        }
-        const user = await User.findById(userId);
-        if (!(await user.comparePassword(currentPassword))) {
-            return res.status(401).json({ error: 'Invalid current password' });
-        }
-        user.password = newPassword;
-        await user.save();
-        console.log('password updated');
-        res.status(200).json({ message: 'Password updated successfully' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Internal Server Error' });
+  try {
+    const userId = req.user.id;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        error: "Both currentPassword and newPassword are required"
+      });
     }
+
+    const user = await User.findById(userId);
+    if (!(await user.comparePassword(currentPassword))) {
+      return res.status(401).json({
+        error: "Invalid current password"
+      });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 module.exports = router;
