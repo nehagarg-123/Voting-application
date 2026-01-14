@@ -19,6 +19,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // HTTP + Socket.io setup
 const server = http.createServer(app);
