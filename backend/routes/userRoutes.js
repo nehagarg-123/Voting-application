@@ -1,46 +1,28 @@
 const express = require('express');
 const router = express.Router();
+const axios = require('axios');
+
 const User = require('./../models/user');
 const Otp = require('./../models/otp');
 const { jwtAuthMiddleware, generateToken } = require('./../jwt');
 
-
-const nodemailer = require("nodemailer");
-
-const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com",
-  port: 587,
-  secure: false, // MUST be false for 587
-  auth: {
-    user: process.env.BREVO_SMTP_USER,
-    pass: process.env.BREVO_SMTP_PASS
-  },
-  connectionTimeout: 10000, 
-  greetingTimeout: 10000,
-  socketTimeout: 10000     
-});
-
-
 const COLLEGE_DOMAIN = "@nitjsr.ac.in";
 
-
+/* ================= SEND OTP ================= */
 router.post('/signup/send-otp', async (req, res) => {
   try {
     const { email } = req.body;
 
-   
     if (!email) {
       return res.status(400).json({ error: "Email is required" });
     }
 
-    /* Domain restriction */
     if (!email.endsWith(COLLEGE_DOMAIN)) {
       return res.status(400).json({
         error: `Only emails from ${COLLEGE_DOMAIN} are allowed.`
       });
     }
 
-    /* Check if user already exists */
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -48,39 +30,46 @@ router.post('/signup/send-otp', async (req, res) => {
       });
     }
 
-    /* Generate OTP */
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    /* Save / Update OTP */
     await Otp.findOneAndUpdate(
       { email },
       { otp: otpCode },
       { upsert: true }
     );
 
-   
-    await transporter.sendMail({
-      from: "Voting App <noreply@brevo.com>", // no domain purchase needed
-      to: email,
-      subject: "OTP Verification",
-      html: `
-        <p>Your OTP for the Voting App is:</p>
-        <h2>${otpCode}</h2>
-        <p>This OTP is valid for 5 minutes.</p>
-      `
-    });
+    /* ✅ BREVO HTTP API (THIS WILL WORK) */
+    await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: "Voting App",
+          email: "noreply@brevo.com"
+        },
+        to: [{ email }],
+        subject: "OTP Verification",
+        htmlContent: `
+          <p>Your OTP for the Voting App is:</p>
+          <h2>${otpCode}</h2>
+          <p>This OTP is valid for 5 minutes.</p>
+        `
+      },
+      {
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json"
+        }
+      }
+    );
 
-    res.status(200).json({
-      message: 'OTP sent successfully'
-    });
+    res.status(200).json({ message: "OTP sent successfully" });
 
   } catch (err) {
-    console.error("SEND OTP ERROR:", err);
-    res.status(500).json({
-      error: 'Internal Server Error during OTP send'
-    });
+    console.error("SEND OTP ERROR:", err.response?.data || err.message);
+    res.status(500).json({ error: "Failed to send OTP email" });
   }
 });
+
 
 router.post('/signup/verify', async (req, res) => {
   try {
