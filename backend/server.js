@@ -13,7 +13,7 @@ const Candidate = require('./models/candidate'); // Only needed for results
 
 // Middleware
 app.use(cors({
-  origin: "https://voting-application-frontend.onrender.com",
+  origin: "https://voting-application-sandy.vercel.app",
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
